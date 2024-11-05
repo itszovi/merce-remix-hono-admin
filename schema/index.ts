@@ -39,6 +39,12 @@ export type Author = typeof table.authors.$inferInsert
 export type Article = typeof table.articles.$inferInsert
 
 /**
+ * article version
+ */
+export type ArticleVersion = typeof table.articleVersions.$inferInsert
+
+
+/**
  * redirection
  */
 export type Redirection = typeof table.redirections.$inferInsert

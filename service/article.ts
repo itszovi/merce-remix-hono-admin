@@ -1,7 +1,7 @@
-import { Article } from "schema"
+import { Article, ArticleVersion } from "schema"
 import { Err, Ok, Result } from "utils/result"
 import { UpdateArticleSchema } from "schema/validator/article"
-import { findArticles, findArticleBySlug, findArticleById, checkArticleSlug, savePartialArticle } from "repository/articles"
+import { findArticles, findArticleBySlug, findArticleById, checkArticleSlug, savePartialArticle, createArticleVersion } from "repository/articles"
 import { createUrlRedirection } from "repository/redirects"
 import { formatArticlePublishDateToPath, formatArticleSlugAndDateToPath } from "utils/article"
 
@@ -49,11 +49,14 @@ export const updateArticle = async (
     articleToSave.path = newPath
     isRedirectionCreated = true
   }
+  const version = await createArticleVersion({...articleToSave, content: ""})
+
   const saved = await savePartialArticle(id, {
-    ...article,
+    ...articleToSave,
     // ! TODO fix the date stuff, maybe just switch to strings...
-    publishedAt: articleToSave.publishedAt ? new Date(articleToSave.publishedAt) : null,
+    publishedAt: articleToSave.publishedAt ?? null,
   })
+
 
   if (saved.error) return Err("SERVICE_ERROR", "failed to save user data")
 

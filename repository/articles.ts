@@ -1,7 +1,7 @@
-import { Article } from "schema"
+import { Article, ArticleVersion } from "schema"
 import { db } from "config/db"
 import { eq } from "drizzle-orm"
-import { articles } from "config/tables"
+import { articles, articleVersions } from "config/tables"
 import { Err, Ok, Result } from "utils/result"
 import { NotFoundError } from "utils/error"
 
@@ -68,7 +68,7 @@ export const checkArticleSlug = async (
 
 export const savePartialArticle = async (
   id: number,
-  article: Partial<Omit<Article, "id" | "email">>
+  article: Partial<Omit<Article, "id">>
 ): Promise<Result<Article>> => {
   try {
     const result = await db
@@ -88,4 +88,40 @@ export const savePartialArticle = async (
   } catch {
     return Err("DATABASE_ERROR", "failed to save article data")
   }
+}
+
+/**
+ * create article version
+ */
+
+export const createArticleVersion = async (
+  article: { id: number; title?: string | undefined; slug?: string | undefined; path?: string | undefined; publishedAt?: string | undefined; content: string; }
+): Promise<Result<ArticleVersion>> => {
+  try {
+    console.log('createArticleVersion')
+    console.log(articles.slug)
+    const { id, ...articleData } = article
+    const result = await db
+      .insert(articleVersions)
+      .values({
+        title: articleData.title || '',
+        slug: articleData.slug || '',
+        content: articleData.content,
+        path: articleData.path || '',
+        publishedAt: articleData.publishedAt
+      })
+
+
+    return Ok(result[0])
+  } catch {
+    return Err("DATABASE_ERROR", "failed to save article data")
+  }
+}
+
+/**
+ * put article into trash
+ */
+
+export const softDeleteArticle = async (id: number) => {
+
 }

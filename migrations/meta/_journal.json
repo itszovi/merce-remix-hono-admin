@@ -50,6 +50,20 @@
       "when": 1730489141397,
       "tag": "0006_tan_mesmero",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1730507354948,
+      "tag": "0007_lethal_reavers",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1730508056598,
+      "tag": "0008_secret_doorman",
+      "breakpoints": true
     }
   ]
 }

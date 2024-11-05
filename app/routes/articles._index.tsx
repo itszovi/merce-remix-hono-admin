@@ -14,13 +14,9 @@ import {
 import { Checkbox } from "~/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
-import { Article as OriginalArticle } from "schema";
+import { Article } from "schema";
 import DOMPurify from "isomorphic-dompurify";
 
-interface Article extends Omit<OriginalArticle, "createdAt" | "updatedAt"> {
-  createdAt?: string | null | undefined;
-  updatedAt?: string | null | undefined;
-}
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const articles = await getArticles();
 

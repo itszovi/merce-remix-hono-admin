@@ -29,6 +29,7 @@ import { GeneralErrorBoundary } from "~/components/error-boundary";
 import { useEffect, useState } from "react";
 import slugify from "slugify";
 import { commitSession, getSession } from "utils/auth.server";
+import { format } from "date-fns";
 
 interface Article extends Omit<OriginalArticle, "createdAt" | "updatedAt"> {
   createdAt?: string | null | undefined;
@@ -127,7 +128,7 @@ export default function ArticleEdit() {
     <div className="container m-auto flex h-full w-full">
       <div className="p-4 w-full">
         <div className="w-full py-4 mb-4">
-          {" "}
+          { article.publishedAt && format(article.publishedAt, "MMMM d, yyyy")}
           <Button asChild>
             <Link to={`/articles/${article.slug}`}>Back</Link>
           </Button>
