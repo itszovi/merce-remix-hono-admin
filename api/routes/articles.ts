@@ -1,5 +1,5 @@
 import { Hono } from "hono"
-import { getArticles, getArticleBySlug, updateArticle } from "service/article"
+import { getArticles, getArticleBySlug, updateArticle, getArticleVersions } from "service/article"
 import { handleResultError } from "api/utils/error"
 import z from "zod"
 import { zValidator } from "@hono/zod-validator"
@@ -45,3 +45,14 @@ export const article = new Hono()
 
     return c.json(updated.value)
   })
+  .get("/:id/versions",
+    async (c) => {
+      const id = c.req.param('id')
+      // const articleById = await getArticleById(Number(id))
+
+      const versions = await getArticleVersions(Number(id))
+
+      if (versions.error) return handleResultError(versions.error)
+
+      return c.json(versions.value)
+    })

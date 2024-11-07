@@ -109,21 +109,30 @@ export const passwordsRelations = relations(passwords, ({ one }) => ({
   user: one(users, { fields: [passwords.userId], references: [users.id] }),
 }));
 
-export const articles = pgTable("articles", {
-  id: serial("id").primaryKey(),
+const articleColumns = {
+  id: serial("id")
+    .primaryKey()
+    .notNull()
+    .primaryKey(),
   title: text("title")
     .notNull(),
-  slug: text("slug")
-    .notNull()
-    .unique(),
   path: text("path"),
+  lead: text("lead"),
   content: text("content")
     .notNull(),
+  isInTrash: boolean('is_in_trash').default(false),
   updatedBy: integer('updated_by'),
   createdAt: timestamp({ withTimezone: true, mode: 'string' })
     .notNull().default(sql`now()`),
   updatedAt: timestamp({ withTimezone: true, mode: 'string' }).default(sql`now()`),
   publishedAt: timestamp({ withTimezone: true, mode: 'string' }).default(sql`null`)
+}
+
+export const articles = pgTable("articles", {
+  slug: text("slug")
+    .notNull()
+    .unique(),
+  ...articleColumns,
 });
 
 export const authors = pgTable("authors", {
@@ -148,11 +157,12 @@ export const contacts = pgTable("contacts", {
   updatedAt: timestamp({ withTimezone: true }).defaultNow(),
 });
 
-export const articlesRelations = relations(articles, ({ one }) => ({
+export const articlesRelations = relations(articles, ({ one, many }) => ({
   author: one(authors, {
     fields: [articles.updatedBy],
     references: [authors.id],
   }),
+  versions: many(articleVersions),
 }));
 
 export const authorsRelations = relations(authors, ({ many }) => ({
@@ -210,21 +220,20 @@ export const redirections = pgTable("redirections", {
 });
 
 export const articleVersions = pgTable("articles_versions", {
-  id: serial("id").primaryKey(),
-  title: text("title")
-    .notNull(),
-  slug: text("slug")
+  articleId: integer('article_id')
     .notNull()
-    .unique(),
-  path: text("path"),
-  content: text("content")
+    .references(() => articles.id),
+  slug: text("slug")
     .notNull(),
-  updatedBy: integer('updated_by'),
-  createdAt: timestamp({ withTimezone: true, mode: 'string' })
-    .notNull().default(sql`now()`),
-  updatedAt: timestamp({ withTimezone: true, mode: 'string' }).default(sql`now()`),
-  publishedAt: timestamp({ withTimezone: true, mode: 'string' }).default(sql`null`)
+  ...articleColumns
 });
+
+export const articleVersionsRelations = relations(articleVersions, ({ one }) => ({
+  article: one(articles, {
+    fields: [articleVersions.articleId],
+    references: [articles.id],
+  }),
+}));
 
 export const authorsToArticleVersions = pgTable(
   'authors_to_article_versions',

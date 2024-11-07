@@ -1,12 +1,12 @@
 import { Article, ArticleVersion } from "schema"
 import { Err, Ok, Result } from "utils/result"
 import { UpdateArticleSchema } from "schema/validator/article"
-import { findArticles, findArticleBySlug, findArticleById, checkArticleSlug, savePartialArticle, createArticleVersion } from "repository/articles"
+import { findArticles, findArticleBySlug, findArticleById, checkArticleSlug, savePartialArticle, createArticleVersion, findArticleVersionsByArticleId, findArticleVersionsByArticleSlug } from "repository/articles"
 import { createUrlRedirection } from "repository/redirects"
 import { formatArticlePublishDateToPath, formatArticleSlugAndDateToPath } from "utils/article"
 
 export const getArticles = async (): Promise<Result<Article[], Err>> => {
-  console.log('find articles')
+  console.log('running getArticles()...')
   const result = await findArticles()
 
   if (result.error) return Err("NOT_FOUND")
@@ -15,6 +15,7 @@ export const getArticles = async (): Promise<Result<Article[], Err>> => {
 }
 
 export const getArticleBySlug = async (slug: Article["slug"]): Promise<Result<Article, Err>> => {
+  console.log('running findArticleBySlug()...')
   const result = await findArticleBySlug(slug)
 
   if (result.error) return Err("NOT_FOUND")
@@ -49,7 +50,7 @@ export const updateArticle = async (
     articleToSave.path = newPath
     isRedirectionCreated = true
   }
-  const version = await createArticleVersion({...articleToSave, content: ""})
+  const version = await createArticleVersion({...articleToSave})
 
   const saved = await savePartialArticle(id, {
     ...articleToSave,
@@ -61,4 +62,15 @@ export const updateArticle = async (
   if (saved.error) return Err("SERVICE_ERROR", "failed to save user data")
 
   return Ok({ redirectTo: isRedirectionCreated ? `/articles/${article.slug}/edit` : false, article: saved.value })
+}
+
+export const getArticleVersions = async (id: Article["id"]): Promise<Result<ArticleVersion[], Err>> => {
+  console.log('running getArticleVersions()...')
+  if (typeof id !== "number") return Err("SERVICE_ERROR", "invalid id")
+
+  const result = await findArticleVersionsByArticleId(id)
+
+  if (result.error) return Err("NOT_FOUND")
+
+  return Ok(result.value)
 }

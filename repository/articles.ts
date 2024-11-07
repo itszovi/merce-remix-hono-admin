@@ -91,25 +91,35 @@ export const savePartialArticle = async (
 }
 
 /**
+ * get article versions
+ */
+
+export const findArticleVersionsByArticleId = async (
+  id: number
+): Promise<Result<ArticleVersion[], NotFoundError>> => {
+
+  const result = await db.query.articleVersions.findMany({
+    where: eq(articleVersions.articleId, id),
+  })
+
+  return result ? Ok(result as ArticleVersion[]) : Err("NOT_FOUND")
+}
+
+
+/**
  * create article version
  */
 
 export const createArticleVersion = async (
-  article: { id: number; title?: string | undefined; slug?: string | undefined; path?: string | undefined; publishedAt?: string | undefined; content: string; }
+  // article: { id: number; title?: string | undefined; slug?: string | undefined; path?: string | undefined; lead?: string | undefined; publishedAt?: string | undefined; content: string; }
+  article: Pick<Article, "id" | "title" | "slug" | "content" | "path" | "lead" | "publishedAt">
 ): Promise<Result<ArticleVersion>> => {
   try {
     console.log('createArticleVersion')
     console.log(articles.slug)
-    const { id, ...articleData } = article
     const result = await db
       .insert(articleVersions)
-      .values({
-        title: articleData.title || '',
-        slug: articleData.slug || '',
-        content: articleData.content,
-        path: articleData.path || '',
-        publishedAt: articleData.publishedAt
-      })
+      .values({ ...article, articleId: article.id! })
 
 
     return Ok(result[0])

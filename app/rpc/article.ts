@@ -1,5 +1,5 @@
 import { hc } from "hono/client"
-import type { ArticleAPI } from "api/routes/articles"
+import { article, type ArticleAPI } from "api/routes/articles"
 import { UpdateArticleSchema } from "schema/validator/article"
 import { Err } from "utils/result"
 
@@ -26,6 +26,12 @@ export const updateArticle = async (article: UpdateArticleSchema) => {
     param: { slug: article.slug! },
     json: { ...article },
   })
+
+  return res.json()
+}
+
+export const getArticleVersions = async (id: number) => {
+  const res = await client.api.articles[":id"].versions.$get({ param: { id: String(id) } })
 
   return res.json()
 }

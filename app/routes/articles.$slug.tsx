@@ -1,10 +1,11 @@
 import { json, LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
-import { getArticleBySlug } from "~/rpc/article";
+import { getArticleBySlug, getArticleVersions } from "~/rpc/article";
 import { Article as OriginalArticle } from "schema";
 import { Button } from "~/components/ui/button";
 import DOMPurify from "isomorphic-dompurify";
 import parse from "html-react-parser";
+import { format } from "date-fns";
 interface Article extends Omit<OriginalArticle, "createdAt" | "updatedAt"> {
   createdAt?: string | null | undefined;
   updatedAt?: string | null | undefined;
@@ -28,11 +29,35 @@ export default function Article() {
   console.log(data.article);
 
   return (
-    <div className="container m-auto flex h-full w-full">
-      <div className="p-4 w-full">
-        <div className="w-full py-4 mb-4">
+    <div className="container flex w-full h-full m-auto">
+      <div className="w-full p-4">
+        <div className="flex w-full gap-4 py-4 mb-8">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="">Status:</span>
+            {article.publishedAt ? (
+              <span className="font-bold">Published</span>
+            ) : (
+              <span className="font-bold">Draft</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="">Published at:</span>
+            {article.publishedAt && (
+              <time className="font-bold">
+                {format(article.publishedAt, "MMMM d, yyyy")}
+              </time>
+            )}
+          </div>
+          {article.updatedAt && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="">Last updated:</span>
+              <time className="font-bold">
+                {format(article.updatedAt, "MMMM d, yyyy")}
+              </time>
+            </div>
+          )}
           <Button asChild>
-            <Link to={`/articles/${data.article.slug}/edit`}>Edit</Link>
+            <Link to={`/articles/${article.slug}/edit`}>Edit</Link>
           </Button>
         </div>
         <h2
