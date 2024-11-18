@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.7.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
   "files": {
     "maxSize": 5242880
   },
@@ -66,6 +66,7 @@
         "useBlockStatements": "off"
       },
       "suspicious": {
+        "noConsole": "warn",
         "noAsyncPromiseExecutor": "error",
         "noCatchAssign": "error",
         "noClassAssign": "error",
@@ -94,7 +95,6 @@
         "useValidTypeof": "error"
       },
       "nursery": {
-        "noConsole": "warn",
         "useSortedClasses": {
           "level": "warn",
           "options": {

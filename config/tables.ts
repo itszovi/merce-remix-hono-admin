@@ -1,7 +1,16 @@
 import { createId } from "utils/uid"
 import { relations, sql } from "drizzle-orm"
-import { text, boolean, pgTable, varchar, timestamp, integer, serial, index, primaryKey } from "drizzle-orm/pg-core"
-
+import {
+  text,
+  boolean,
+  pgTable,
+  varchar,
+  timestamp,
+  integer,
+  serial,
+  index,
+  primaryKey,
+} from "drizzle-orm/pg-core"
 
 // model Session {
 //   id             String   @id @default(cuid())
@@ -22,8 +31,7 @@ export const sessions = pgTable("session", {
     .notNull()
     .primaryKey()
     .$defaultFn(() => createId()),
-  expirationDate: timestamp("expiration_date")
-    .notNull(),
+  expirationDate: timestamp("expiration_date").notNull(),
   userId: varchar("user_id")
     .notNull()
     .references(() => users.id),
@@ -98,55 +106,50 @@ export const usersRelations = relations(users, ({ one, many }) => ({
 }))
 
 export const passwords = pgTable("passwords", {
-  hash: text("hash")
-    .notNull(),
-  userId: varchar('user_id').references(() => users.id),
+  hash: text("hash").notNull(),
+  userId: varchar("user_id").references(() => users.id),
   createdAt: timestamp({ withTimezone: true }),
   updatedAt: timestamp({ withTimezone: true }).defaultNow(),
 })
 
 export const passwordsRelations = relations(passwords, ({ one }) => ({
   user: one(users, { fields: [passwords.userId], references: [users.id] }),
-}));
+}))
 
 const articleColumns = {
-  id: serial("id")
-    .primaryKey()
-    .notNull()
-    .primaryKey(),
-  title: text("title")
-    .notNull(),
+  id: serial("id").primaryKey().notNull().primaryKey(),
+  title: text("title").notNull(),
   path: text("path"),
   lead: text("lead"),
-  content: text("content")
-    .notNull(),
-  isInTrash: boolean('is_in_trash').default(false),
-  updatedBy: integer('updated_by'),
-  createdAt: timestamp({ withTimezone: true, mode: 'string' })
-    .notNull().default(sql`now()`),
-  updatedAt: timestamp({ withTimezone: true, mode: 'string' }).default(sql`now()`),
-  publishedAt: timestamp({ withTimezone: true, mode: 'string' }).default(sql`null`)
+  content: text("content").notNull(),
+  isInTrash: boolean("is_in_trash").default(false),
+  updatedBy: integer("updated_by"),
+  createdAt: timestamp({ withTimezone: true, mode: "string" })
+    .notNull()
+    .default(sql`now()`),
+  updatedAt: timestamp({ withTimezone: true, mode: "string" }).default(
+    sql`now()`
+  ),
+  publishedAt: timestamp({ withTimezone: true, mode: "string" }).default(
+    sql`null`
+  ),
 }
 
 export const articles = pgTable("articles", {
-  slug: text("slug")
-    .notNull()
-    .unique(),
+  slug: text("slug").notNull().unique(),
   ...articleColumns,
-});
+})
 
 export const authors = pgTable("authors", {
   id: serial("id").primaryKey(),
-  name: text("name")
-    .notNull(),
-  slug: text("slug")
-    .notNull(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
   description: text("description"),
   url: text("url"),
   image: text("image"),
-  createdAt: timestamp({ withTimezone: true, mode: 'string' }),
-  updatedAt: timestamp({ withTimezone: true, mode: 'string' }).defaultNow(),
-});
+  createdAt: timestamp({ withTimezone: true, mode: "string" }),
+  updatedAt: timestamp({ withTimezone: true, mode: "string" }).defaultNow(),
+})
 
 export const contacts = pgTable("contacts", {
   id: serial("id").primaryKey(),
@@ -155,7 +158,7 @@ export const contacts = pgTable("contacts", {
   authorId: integer("author_id"),
   createdAt: timestamp({ withTimezone: true }),
   updatedAt: timestamp({ withTimezone: true }).defaultNow(),
-});
+})
 
 export const articlesRelations = relations(articles, ({ one, many }) => ({
   author: one(authors, {
@@ -163,100 +166,109 @@ export const articlesRelations = relations(articles, ({ one, many }) => ({
     references: [authors.id],
   }),
   versions: many(articleVersions),
-}));
+}))
 
 export const authorsRelations = relations(authors, ({ many }) => ({
   contacts: many(contacts),
-  articles: many(articles, { relationName: 'updater' }),
-  articleVersions: many(articleVersions, { relationName: 'updater' }),
-}));
+  articles: many(articles, { relationName: "updater" }),
+  articleVersions: many(articleVersions, { relationName: "updater" }),
+}))
 
 export const authorsToArticles = pgTable(
-  'authors_to_articles',
+  "authors_to_articles",
   {
-    authorId: integer('author_id')
+    authorId: integer("author_id")
       .notNull()
       .references(() => authors.id),
-    articleId: integer('article_id')
+    articleId: integer("article_id")
       .notNull()
       .references(() => articles.id),
   },
   (t) => ({
     pk: primaryKey({ columns: [t.authorId, t.articleId] }),
-  }),
-);
+  })
+)
 
-export const authorsToArticlesRelations = relations(authorsToArticles, ({ one }) => ({
-  article: one(articles, {
-    fields: [authorsToArticles.articleId],
-    references: [articles.id],
-  }),
-  author: one(authors, {
-    fields: [authorsToArticles.authorId],
-    references: [authors.id],
-  }),
-}));
+export const authorsToArticlesRelations = relations(
+  authorsToArticles,
+  ({ one }) => ({
+    article: one(articles, {
+      fields: [authorsToArticles.articleId],
+      references: [articles.id],
+    }),
+    author: one(authors, {
+      fields: [authorsToArticles.authorId],
+      references: [authors.id],
+    }),
+  })
+)
 
 export const contactsRelations = relations(contacts, ({ one }) => ({
   author: one(authors, {
     fields: [contacts.authorId],
     references: [authors.id],
   }),
-}));
+}))
 
-export const redirections = pgTable("redirections", {
-  id: serial("id").primaryKey(),
-  from: text("from")
-    .notNull()
-    .unique(),
-  to: text("to")
-    .notNull(),
-  createdAt: timestamp({ withTimezone: true, mode: 'string' }),
-  updatedAt: timestamp({ withTimezone: true, mode: 'string' }),
-}, (table) => {
-  return {
-    fromIdx: index("name_idx").on(table.from),
-  };
-});
+export const redirections = pgTable(
+  "redirections",
+  {
+    id: serial("id").primaryKey(),
+    from: text("from").notNull().unique(),
+    to: text("to").notNull(),
+    createdAt: timestamp({ withTimezone: true, mode: "string" }),
+    updatedAt: timestamp({ withTimezone: true, mode: "string" }),
+  },
+  (table) => {
+    return {
+      fromIdx: index("name_idx").on(table.from),
+    }
+  }
+)
 
 export const articleVersions = pgTable("articles_versions", {
-  articleId: integer('article_id')
+  articleId: integer("article_id")
     .notNull()
     .references(() => articles.id),
-  slug: text("slug")
-    .notNull(),
-  ...articleColumns
-});
+  slug: text("slug").notNull(),
+  ...articleColumns,
+})
 
-export const articleVersionsRelations = relations(articleVersions, ({ one }) => ({
-  article: one(articles, {
-    fields: [articleVersions.articleId],
-    references: [articles.id],
-  }),
-}));
+export const articleVersionsRelations = relations(
+  articleVersions,
+  ({ one }) => ({
+    article: one(articles, {
+      fields: [articleVersions.articleId],
+      references: [articles.id],
+    }),
+  })
+)
 
 export const authorsToArticleVersions = pgTable(
-  'authors_to_article_versions',
+  "authors_to_article_versions",
   {
-    authorId: integer('author_id')
+    authorId: integer("author_id")
       .notNull()
       .references(() => authors.id),
-    articleVersionId: integer('article_version_id')
+    articleVersionId: integer("article_version_id")
       .notNull()
       .references(() => articleVersions.id),
   },
   (t) => ({
     pk: primaryKey({ columns: [t.authorId, t.articleVersionId] }),
-  }),
-);
+  })
+)
 
-export const authorsToArticleVersionsRelations = relations(authorsToArticleVersions, ({ one }) => ({
-  article_version: one(articleVersions, {
-    fields: [authorsToArticleVersions.articleVersionId],
-    references: [articleVersions.id],
-  }),
-  author: one(authors, {
-    fields: [authorsToArticleVersions.authorId],
-    references: [authors.id],
-  }),
-}));
+export const authorsToArticleVersionsRelations = relations(
+  authorsToArticleVersions,
+  ({ one }) => ({
+    article_version: one(articleVersions, {
+      fields: [authorsToArticleVersions.articleVersionId],
+      references: [articleVersions.id],
+    }),
+    author: one(authors, {
+      fields: [authorsToArticleVersions.authorId],
+      references: [authors.id],
+    }),
+  })
+)

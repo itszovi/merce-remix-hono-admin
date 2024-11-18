@@ -91,12 +91,8 @@
           "name": "articles_versions_article_id_articles_id_fk",
           "tableFrom": "articles_versions",
           "tableTo": "articles",
-          "columnsFrom": [
-            "article_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["article_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -189,9 +185,7 @@
         "articles_slug_unique": {
           "name": "articles_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -254,12 +248,8 @@
           "name": "auth_user_id_users_id_fk",
           "tableFrom": "auth",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -355,12 +345,8 @@
           "name": "authors_to_article_versions_author_id_authors_id_fk",
           "tableFrom": "authors_to_article_versions",
           "tableTo": "authors",
-          "columnsFrom": [
-            "author_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["author_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -368,12 +354,8 @@
           "name": "authors_to_article_versions_article_version_id_articles_versions_id_fk",
           "tableFrom": "authors_to_article_versions",
           "tableTo": "articles_versions",
-          "columnsFrom": [
-            "article_version_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["article_version_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -381,10 +363,7 @@
       "compositePrimaryKeys": {
         "authors_to_article_versions_author_id_article_version_id_pk": {
           "name": "authors_to_article_versions_author_id_article_version_id_pk",
-          "columns": [
-            "author_id",
-            "article_version_id"
-          ]
+          "columns": ["author_id", "article_version_id"]
         }
       },
       "uniqueConstraints": {},
@@ -415,12 +394,8 @@
           "name": "authors_to_articles_author_id_authors_id_fk",
           "tableFrom": "authors_to_articles",
           "tableTo": "authors",
-          "columnsFrom": [
-            "author_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["author_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -428,12 +403,8 @@
           "name": "authors_to_articles_article_id_articles_id_fk",
           "tableFrom": "authors_to_articles",
           "tableTo": "articles",
-          "columnsFrom": [
-            "article_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["article_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -441,10 +412,7 @@
       "compositePrimaryKeys": {
         "authors_to_articles_author_id_article_id_pk": {
           "name": "authors_to_articles_author_id_article_id_pk",
-          "columns": [
-            "author_id",
-            "article_id"
-          ]
+          "columns": ["author_id", "article_id"]
         }
       },
       "uniqueConstraints": {},
@@ -538,12 +506,8 @@
           "name": "passwords_user_id_users_id_fk",
           "tableFrom": "passwords",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -612,9 +576,7 @@
         "redirections_from_unique": {
           "name": "redirections_from_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "from"
-          ]
+          "columns": ["from"]
         }
       },
       "policies": {},
@@ -664,12 +626,8 @@
           "name": "session_user_id_users_id_fk",
           "tableFrom": "session",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -736,16 +694,12 @@
         "users_id_unique": {
           "name": "users_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         },
         "users_user_name_unique": {
           "name": "users_user_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_name"
-          ]
+          "columns": ["user_name"]
         }
       },
       "policies": {},

@@ -1,5 +1,6 @@
 import z, { ZodType } from "zod"
 import type { User } from "schema"
+import { redirect } from "@remix-run/server-runtime"
 
 export type UpdateUserSchema = z.output<typeof updateUserSchema>
 
@@ -18,3 +19,11 @@ export const updateUserSchema = z.object({
       )
   ),
 }) satisfies ZodType<Partial<Pick<User, "email" | "full_name" | "user_name">>>
+
+export const loginUserSchema = z.object({
+  user_name: z.string().min(1, "Enter your username"),
+  password: z.string().min(1, "Enter your password"),
+  redirectTo: z.optional(
+    z.string().trim()
+  ),
+}) satisfies ZodType<Partial<Pick<User, "user_name">>>

@@ -24,7 +24,9 @@ import { NotFoundError } from "utils/error"
 /**
  * get articles
  */
-export const findArticles = async (): Promise<Result<Article[], NotFoundError>> => {
+export const findArticles = async (): Promise<
+  Result<Article[], NotFoundError>
+> => {
   const result = await db.query.articles.findMany()
 
   return result ? Ok(result as Article[]) : Err("NOT_FOUND")
@@ -33,7 +35,9 @@ export const findArticles = async (): Promise<Result<Article[], NotFoundError>> 
 /**
  * get article by slug
  */
-export const findArticleBySlug = async (slug: Article["slug"]): Promise<Result<Article, NotFoundError>> => {
+export const findArticleBySlug = async (
+  slug: Article["slug"]
+): Promise<Result<Article, NotFoundError>> => {
   const result = await db.query.articles.findFirst({
     where: eq(articles.slug, slug),
   })
@@ -44,7 +48,9 @@ export const findArticleBySlug = async (slug: Article["slug"]): Promise<Result<A
 /**
  * get article by id
  */
-export const findArticleById = async (id: Article["id"]): Promise<Result<Article, NotFoundError>> => {
+export const findArticleById = async (
+  id: Article["id"]
+): Promise<Result<Article, NotFoundError>> => {
   const result = await db.query.articles.findFirst({
     where: eq(articles.id, Number(id)),
   })
@@ -71,6 +77,7 @@ export const savePartialArticle = async (
   article: Partial<Omit<Article, "id">>
 ): Promise<Result<Article>> => {
   try {
+    console.log(article.content)
     const result = await db
       .update(articles)
       .set(article)
@@ -97,7 +104,6 @@ export const savePartialArticle = async (
 export const findArticleVersionsByArticleId = async (
   id: number
 ): Promise<Result<ArticleVersion[], NotFoundError>> => {
-
   const result = await db.query.articleVersions.findMany({
     where: eq(articleVersions.articleId, id),
   })
@@ -105,6 +111,20 @@ export const findArticleVersionsByArticleId = async (
   return result ? Ok(result as ArticleVersion[]) : Err("NOT_FOUND")
 }
 
+/**
+ * get article version by article id and version id
+ */
+
+export const findArticleVersionsByArticleIdAndVersionId = async (
+  id: number,
+  versionId: number
+): Promise<Result<ArticleVersion, NotFoundError>> => {
+  const result = await db.query.articleVersions.findFirst({
+    where: eq(articleVersions.articleId, id) && eq(articleVersions.id, versionId),
+  })
+
+  return result ? Ok(result as ArticleVersion) : Err("NOT_FOUND")
+}
 
 /**
  * create article version
@@ -112,15 +132,17 @@ export const findArticleVersionsByArticleId = async (
 
 export const createArticleVersion = async (
   // article: { id: number; title?: string | undefined; slug?: string | undefined; path?: string | undefined; lead?: string | undefined; publishedAt?: string | undefined; content: string; }
-  article: Pick<Article, "id" | "title" | "slug" | "content" | "path" | "lead" | "publishedAt">
+  article: Pick<
+    Article,
+    "id" | "title" | "slug" | "content" | "path" | "lead" | "publishedAt"
+  >
 ): Promise<Result<ArticleVersion>> => {
   try {
-    console.log('createArticleVersion')
-    console.log(articles.slug)
+    // console.log('createArticleVersion')
+    // console.log(articles.slug)
     const result = await db
       .insert(articleVersions)
       .values({ ...article, articleId: article.id! })
-
 
     return Ok(result[0])
   } catch {
@@ -132,6 +154,4 @@ export const createArticleVersion = async (
  * put article into trash
  */
 
-export const softDeleteArticle = async (id: number) => {
-
-}
+export const softDeleteArticle = async (id: number) => {}

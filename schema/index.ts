@@ -43,7 +43,6 @@ export type Article = typeof table.articles.$inferInsert
  */
 export type ArticleVersion = typeof table.articleVersions.$inferInsert
 
-
 /**
  * redirection
  */

@@ -1,8 +1,8 @@
-import { ReactRenderer } from "@tiptap/react";
-import { SuggestionProps, SuggestionKeyDownProps } from "@tiptap/suggestion";
+import { ReactRenderer } from "@tiptap/react"
+import { SuggestionProps, SuggestionKeyDownProps } from "@tiptap/suggestion"
 
-import MentionList from "./mention-list";
-import { createRef } from "react";
+import MentionList from "./mention-list"
+import { createRef } from "react"
 
 export default {
   items: ({ query }: { query: string }) => {
@@ -34,45 +34,45 @@ export default {
       "Lisa Bonet",
     ]
       .filter((item) => item.toLowerCase().startsWith(query.toLowerCase()))
-      .slice(0, 5);
+      .slice(0, 5)
   },
 
   render: () => {
-    let component: ReactRenderer;
+    let component: ReactRenderer
 
     return {
       onStart: (props: SuggestionProps) => {
         component = new ReactRenderer(MentionList, {
           props,
           editor: props.editor,
-        });
+        })
 
         if (!props.clientRect) {
-          return;
+          return
         }
       },
 
       onUpdate(props: SuggestionProps) {
-        component.updateProps(props);
+        component.updateProps(props)
 
         if (!props.clientRect) {
-          return;
+          return
         }
       },
 
       onKeyDown(props: SuggestionKeyDownProps) {
         if (props.event.key === "Escape") {
-          return true;
+          return true
         }
 
         // TODO! Fix this type error
-        return (component.ref as any)?.onKeyDown(props);
+        return (component.ref as any)?.onKeyDown(props)
       },
 
       onExit() {
         // popup.destroy();
-        component.destroy();
+        component.destroy()
       },
-    };
+    }
   },
-};
+}

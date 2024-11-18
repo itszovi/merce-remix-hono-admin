@@ -1,36 +1,40 @@
 import {
   ActionFunctionArgs,
-  json,
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
-import { Link, Form, useLoaderData } from "@remix-run/react";
-import { getArticleBySlug, getArticleVersions, updateArticle } from "~/rpc/article";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import { Checkbox } from "~/components/ui/checkbox";
-import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+  Link,
+  Form,
+  useLoaderData,
+  useActionData,
+  useSearchParams,
+} from "@remix-run/react";
+import {
+  getArticleBySlug,
+  getArticleVersions,
+  updateArticle,
+} from "~/rpc/article";
 import { Article as OriginalArticle } from "schema";
-import DOMPurify from "isomorphic-dompurify";
-import parse from "html-react-parser";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
+import { Spinner } from "~/components/ui/spinner";
 import { Toaster } from "~/components/ui/sonner";
+import { SymbolIcon } from "@radix-ui/react-icons";
+import { getZodConstraint, parseWithZod } from "@conform-to/zod";
+import { Field, WysiwygField } from "~/components/form";
 import { toast } from "sonner";
 import { GeneralErrorBoundary } from "~/components/error-boundary";
 import { useEffect, useState } from "react";
 import slugify from "slugify";
 import { commitSession, getSession } from "utils/auth.server";
 import { format } from "date-fns";
+import { ClientOnly } from "remix-utils/client-only";
 import { WysiwygEditor } from "~/components/wysiwyg";
+import { useIsPending } from "utils/form";
+import { getFormProps, getInputProps, useForm } from "@conform-to/react";
+import { updateArticleSchema } from "schema/validator/article";
 
 interface Article extends Omit<OriginalArticle, "createdAt" | "updatedAt"> {
   createdAt?: string | null | undefined;
@@ -40,46 +44,54 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   if (params.slug === undefined) return redirect("/articles");
 
   const article = await getArticleBySlug(params.slug);
-  
+
   if ("error" in article || !article.id) return redirect("/articles");
-  
+
   const versions = await getArticleVersions(article.id);
   // const session = await getSession(request.headers.get("Cookie"));
   // const message = session.get("message") || null;
 
   // return json({ article, mesaage });
 
-  return json({ article, versions });
+  return { article, versions };
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  console.log(request);
-  console.log("action");
-
   const formData = await request.formData();
+
+  console.log(formData);
+
   const id = formData.get("id");
-  const slug = formData.get("slug") as string;
-  const title = formData.get("title") as string;
-  const path = formData.get("path") as string | undefined;
-  const lead = formData.get("lead") as string;
-  const content = formData.get("content") as string;
-  const publishedAt = formData.get("publishedAt") as string;
+  const slug = formData.get("slug");
+  const title = formData.get("title");
+  const path = formData.get("path");
+  const lead = formData.get("lead");
+  const content = formData.get("content");
+  const publishedAt = formData.get("publishedAt");
 
-  if (!id || !title || !slug) return json({ error: "missing data" });
+  console.log("CONTENT HERE: ");
+  console.log(content);
 
-  const updateResponse = await updateArticle({
-    id: Number(id),
-    slug: slug as string,
-    title: title as string,
-    path: path,
-    lead: lead,
-    content: content,
-    publishedAt: publishedAt ?? undefined,
-  });
+  console.log("id: " + id);
+  console.log("slug: " + slug);
+  console.log("title: " + title);
+  console.log("path: " + path);
+  console.log("lead: " + lead);
+  console.log("publishedAt: " + publishedAt);
 
-  const { redirectTo, article } = updateResponse;
+  // const updateResponse = await updateArticle({
+  //   id: Number(id),
+  //   slug: slug as string,
+  //   title: title as string,
+  //   path: path,
+  //   lead: lead,
+  //   content: content,
+  //   publishedAt: publishedAt ?? undefined,
+  // });
 
-  if (redirectTo !== false) return redirect(redirectTo as string);
+  // const { redirectTo, article } = updateResponse;
+
+  // if (redirectTo !== false) return redirect(redirectTo as string);
 
   // const session = await getSession(request.headers.get("Cookie"));
 
@@ -92,26 +104,23 @@ export async function action({ request }: ActionFunctionArgs) {
   //   },
   // });
 
-  return json({ article });
+  // return article;
+  return {};
 }
 
 export default function ArticleEdit() {
-  const {
-    article,
-    versions
-    // message
-  } = useLoaderData<typeof loader>();
+  const { article, versions } = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
+  const isPending = useIsPending();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo");
+
   const [title, setTitle] = useState(article.title);
   const [slug, setSlug] = useState(article.slug);
+  const [isSlugTouched, setIsSlugTouched] = useState(false);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(
-      slugify(e.target.value, {
-        lower: true,
-        strict: true,
-        trim: true,
-      })
-    );
+    setTitle(e.target.value);
   };
 
   const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,6 +133,32 @@ export default function ArticleEdit() {
     );
   };
 
+  const refreshSlug = () => {
+    setSlug(slugify(title, { lower: true, strict: true, trim: false }));
+  };
+
+  useEffect(() => {
+    if (isSlugTouched) return;
+    setSlug(
+      slugify(title, {
+        lower: true,
+        strict: true,
+        trim: false,
+      })
+    );
+  }, [title]);
+
+  const [form, fields] = useForm({
+    id: "edit-article-form",
+    constraint: getZodConstraint(updateArticleSchema),
+    defaultValue: { redirectTo },
+    lastResult: actionData?.result,
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: updateArticleSchema });
+    },
+    shouldRevalidate: "onBlur",
+  });
+
   // console.log(article);
   console.log(versions);
   // console.log(message);
@@ -133,11 +168,27 @@ export default function ArticleEdit() {
   return (
     <div className="container flex w-full h-full m-auto">
       <div className="w-full p-4">
-        <div className="flex w-full gap-4 py-4 mb-8">
-          <h1 className="text-4xl font-bold">{article.title}</h1>
-          <Button asChild>
-            <Link to={`/articles/${article.slug}`}>Back</Link>
-          </Button>
+        <div className="flex justify-between w-full gap-4 py-4 mb-8">
+          <h1 className="text-4xl font-bold">
+            {title.length > 0 ? title : "Add a title"}
+          </h1>
+          <div className="flex gap-4">
+            <Button asChild>
+              <Link to={`/articles/${article.slug}`}>Back</Link>
+            </Button>
+            <Button
+              variant="secondary"
+              asChild
+              disabled={versions.length === 0}
+            >
+              <Link to={`/articles/${article.slug}/versions`}>
+                Versions ({versions.length})
+              </Link>
+            </Button>
+            <Button variant="destructive" asChild>
+              <Link to={`/articles/${article.slug}`}>Delete</Link>
+            </Button>
+          </div>
         </div>
         <div className="flex w-full gap-4 py-4 mb-8 border-b zinc-800">
           <div className="flex items-center gap-2 text-sm">
@@ -166,10 +217,10 @@ export default function ArticleEdit() {
           )}
         </div>
         <Form
-          id="article-form"
-          method="post"
+          method="POST"
           encType="multipart/form-data"
           className="flex flex-col w-1/2 gap-4"
+          {...getFormProps(form)}
         >
           <Input
             name="id"
@@ -177,39 +228,87 @@ export default function ArticleEdit() {
             hidden
             className="hidden"
           />
-          <Label htmlFor="title">Title</Label>
-          <Input
-            name="title"
-            value={title}
-            onChange={handleTitleChange}
-            placeholder="Article Title"
+          <Field
+            labelProps={{
+              children: "Title",
+            }}
+            inputProps={{
+              ...getInputProps(fields.title, { type: "text" }),
+              onChange: handleTitleChange,
+              placeholder: "Article Title",
+              value: title,
+            }}
+            errors={fields.title.errors}
           />
-          <Label htmlFor="slug">Slug</Label>
-          <Input
-            name="slug"
-            value={slug}
-            onChange={handleSlugChange}
-            placeholder="article-slug"
+          <div className="flex gap-4 items-end">
+            <Field
+              className="w-full"
+              labelProps={{
+                children: "Slug",
+              }}
+              inputProps={{
+                ...getInputProps(fields.slug, { type: "text" }),
+                onChange: handleSlugChange,
+                placeholder: "Article Slug",
+                value: slug,
+                onBlur: () => {
+                  setIsSlugTouched(true);
+                },
+              }}
+              errors={fields.slug.errors}
+            />
+            <Button
+              variant="outline"
+              type="button"
+              disabled={isPending}
+              onClick={refreshSlug}
+              className="mt-4"
+            >
+              <SymbolIcon color="black" />
+            </Button>
+          </div>
+          <Field
+            labelProps={{
+              children: "Path",
+            }}
+            inputProps={{
+              ...getInputProps(fields.path, { type: "text" }),
+              placeholder: "Article Path",
+              defaultValue: article.path ?? undefined,
+            }}
+            errors={fields.path.errors}
           />
-          <Input
-            name="path"
-            defaultValue={article.path ?? undefined}
-            hidden
+          <Field
+            labelProps={{
+              children: "Lead",
+            }}
+            inputProps={{
+              ...getInputProps(fields.lead, { type: "text" }),
+              placeholder: "Article Lead",
+              defaultValue: article.lead ?? undefined,
+            }}
+            errors={fields.lead.errors}
+          />
+          <WysiwygField
+            labelProps={{
+              children: "Excerpt",
+            }}
+            inputProps={{
+              ...getInputProps(fields.content, { type: "hidden" }),
+              defaultValue: article.content,
+            }}
+          />
+          <Field
             className="hidden"
-          />
-          <Label htmlFor="lead">Lead</Label>
-          <Input
-            name="lead"
-            defaultValue={article.lead ?? ""}
-            placeholder="Article lead"
-          />
-          <Label htmlFor="content">Content</Label>
-          <WysiwygEditor name="content" defaultValue={article.content ? article.content.replaceAll("\\n", "") : ""} />
-          <Input
-            name="publishedAt"
-            defaultValue={article.publishedAt ?? undefined}
-            hidden
-            className="hidden"
+            labelProps={{
+              children: "Published at",
+            }}
+            inputProps={{
+              ...getInputProps(fields.publishedAt, { type: "date" }),
+              placeholder: "Article Published at",
+              defaultValue: article.publishedAt ?? undefined,
+            }}
+            errors={fields.publishedAt.errors}
           />
           <Button type="submit">Save</Button>
         </Form>

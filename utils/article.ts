@@ -13,10 +13,13 @@ export const formatArticlePublishDateToPath = (publishDate: string): string => {
  * create path from slug and date
  */
 
-export const formatArticleSlugAndDateToPath = (slug: string, datePath: string): string => {
+export const formatArticleSlugAndDateToPath = (
+  slug: string,
+  datePath: string
+): string => {
   console.log({
     slug,
-    datePath
+    datePath,
   })
   return datePath ? `/${datePath}/${slug}/` : `/${slug}/`
 }

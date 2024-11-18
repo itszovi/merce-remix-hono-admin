@@ -1,11 +1,11 @@
-import { SuggestionProps } from "@tiptap/suggestion";
+import { SuggestionProps } from "@tiptap/suggestion"
 import React, {
   useRef,
   forwardRef,
   useEffect,
   useImperativeHandle,
   useState,
-} from "react";
+} from "react"
 
 import {
   Command,
@@ -14,59 +14,59 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "~/components/ui/command";
-import { Popover, PopoverAnchor, PopoverContent } from "~/components/ui/popover";
+} from "~/components/ui/command"
+import { Popover, PopoverAnchor, PopoverContent } from "~/components/ui/popover"
 
 export default forwardRef((props: SuggestionProps, ref) => {
-  let mentionRef: React.RefObject<Element> = useRef(props.decorationNode);
+  const mentionRef: React.RefObject<Element> = useRef(props.decorationNode)
 
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isOpened, setIsOpened] = useState(true);
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [isOpened, setIsOpened] = useState(true)
 
   const selectItem = (index: number) => {
-    const item = props.items[index];
+    const item = props.items[index]
     if (item) {
-      props.command({ id: item });
+      props.command({ id: item })
     }
-    setIsOpened(false);
-  };
+    setIsOpened(false)
+  }
 
   const upHandler = () => {
     setSelectedIndex(
       (selectedIndex + props.items.length - 1) % props.items.length
-    );
-  };
+    )
+  }
 
   const downHandler = () => {
-    setSelectedIndex((selectedIndex + 1) % props.items.length);
-  };
+    setSelectedIndex((selectedIndex + 1) % props.items.length)
+  }
 
   const enterHandler = () => {
-    selectItem(selectedIndex);
-  };
+    selectItem(selectedIndex)
+  }
 
-  useEffect(() => setSelectedIndex(0), [props.items]);
+  useEffect(() => setSelectedIndex(0), [props.items])
 
   useImperativeHandle(ref, () => ({
     onKeyDown: ({ event }: { event: React.KeyboardEvent }) => {
       if (event.key === "ArrowUp") {
-        upHandler();
-        return true;
+        upHandler()
+        return true
       }
 
       if (event.key === "ArrowDown") {
-        downHandler();
-        return true;
+        downHandler()
+        return true
       }
 
       if (event.key === "Enter") {
-        enterHandler();
-        return true;
+        enterHandler()
+        return true
       }
 
-      return false;
+      return false
     },
-  }));
+  }))
 
   return (
     <Popover open={isOpened}>
@@ -91,5 +91,5 @@ export default forwardRef((props: SuggestionProps, ref) => {
         </Command>
       </PopoverContent>
     </Popover>
-  );
-});
+  )
+})

@@ -1,8 +1,8 @@
-import { json, LoaderFunctionArgs, redirect } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
-import { getArticles } from "~/rpc/article";
-import { DataTable } from "~/components/data-table";
-import { Button } from "~/components/ui/button";
+import { LoaderFunctionArgs, redirect } from "@remix-run/node"
+import { Link, useLoaderData } from "@remix-run/react"
+import { getArticles } from "~/rpc/article"
+import { DataTable } from "~/components/data-table"
+import { Button } from "~/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,18 +10,18 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import { Checkbox } from "~/components/ui/checkbox";
-import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
-import { Article } from "schema";
-import DOMPurify from "isomorphic-dompurify";
+} from "~/components/ui/dropdown-menu"
+import { Checkbox } from "~/components/ui/checkbox"
+import { ColumnDef } from "@tanstack/react-table"
+import { MoreHorizontal } from "lucide-react"
+import { Article } from "schema"
+import DOMPurify from "isomorphic-dompurify"
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
-  const articles = await getArticles();
+  const articles = await getArticles()
 
-  return json({ articles });
-};
+  return articles
+}
 
 const columns: ColumnDef<Article>[] = [
   {
@@ -54,14 +54,14 @@ const columns: ColumnDef<Article>[] = [
     accessorKey: "title",
     header: "Title",
     cell: ({ row }) => {
-      const { slug } = row.original;
+      const { slug } = row.original
 
       return (
         <Link
           className="text-blue-500 hover:text-blue-700"
           to={`/articles/${slug}`}
         >{`${DOMPurify.sanitize(row.original.title)}`}</Link>
-      );
+      )
     },
   },
   {
@@ -72,28 +72,28 @@ const columns: ColumnDef<Article>[] = [
     accessorKey: "createdAt",
     header: "Created At",
     cell: ({ getValue }) => {
-      const value = getValue() as string | null | undefined;
+      const value = getValue() as string | null | undefined
 
-      if (!value) return null;
+      if (!value) return null
 
-      return new Date(value).toLocaleString();
+      return new Date(value).toLocaleString()
     },
   },
   {
     accessorKey: "updatedAt",
     header: "Updated At",
     cell: ({ getValue }) => {
-      const value = getValue() as string | null | undefined;
+      const value = getValue() as string | null | undefined
 
-      if (!value) return null;
+      if (!value) return null
 
-      return new Date(value).toLocaleString();
+      return new Date(value).toLocaleString()
     },
   },
-];
+]
 
 export default function Articles() {
-  const { articles } = useLoaderData<typeof loader>();
+  const articles = useLoaderData<typeof loader>()
 
   return (
     <div className="container m-auto flex h-full w-full">
@@ -101,5 +101,5 @@ export default function Articles() {
         <DataTable columns={columns} data={articles} />
       </div>
     </div>
-  );
+  )
 }

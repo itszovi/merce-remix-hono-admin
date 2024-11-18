@@ -1,32 +1,27 @@
-import { json, LoaderFunctionArgs, redirect } from "@remix-run/node";
-import { useLoaderData, Link } from "@remix-run/react";
-import { getArticleBySlug, getArticleVersions } from "~/rpc/article";
-import { Article as OriginalArticle } from "schema";
-import { Button } from "~/components/ui/button";
-import DOMPurify from "isomorphic-dompurify";
-import parse from "html-react-parser";
-import { format } from "date-fns";
+import { LoaderFunctionArgs, redirect } from "@remix-run/node"
+import { useLoaderData, Link } from "@remix-run/react"
+import { getArticleBySlug, getArticleVersions } from "~/rpc/article"
+import { Article as OriginalArticle } from "schema"
+import { Button } from "~/components/ui/button"
+import DOMPurify from "isomorphic-dompurify"
+import parse from "html-react-parser"
+import { format } from "date-fns"
 interface Article extends Omit<OriginalArticle, "createdAt" | "updatedAt"> {
-  createdAt?: string | null | undefined;
-  updatedAt?: string | null | undefined;
+  createdAt?: string | null | undefined
+  updatedAt?: string | null | undefined
 }
 export const loader = async ({ params }: LoaderFunctionArgs) => {
-  if (params.slug === undefined) return redirect("/articles");
+  if (params.slug === undefined) return redirect("/articles")
 
-  console.log("helyzet?");
+  const article = await getArticleBySlug(params.slug)
 
-  const article = await getArticleBySlug(params.slug);
+  if ("error" in article) throw new Error("not found")
 
-  if ("error" in article) throw new Error("not found");
-
-  return json({ article });
-};
+  return article
+}
 
 export default function Article() {
-  const data = useLoaderData<typeof loader>();
-  const { article } = data;
-
-  console.log(data.article);
+  const article = useLoaderData<typeof loader>()
 
   return (
     <div className="container flex w-full h-full m-auto">
@@ -69,5 +64,5 @@ export default function Article() {
         <div>{parse(DOMPurify.sanitize(article.content))}</div>
       </div>
     </div>
-  );
+  )
 }

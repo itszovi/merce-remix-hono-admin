@@ -1,9 +1,18 @@
 import { Hono } from "hono"
-import { getArticles, getArticleBySlug, updateArticle, getArticleVersions } from "service/article"
+import {
+  getArticles,
+  getArticleBySlug,
+  updateArticle,
+  getArticleVersions,
+  getArticleVersionById,
+} from "service/article"
 import { handleResultError } from "api/utils/error"
 import z from "zod"
 import { zValidator } from "@hono/zod-validator"
-import { getArticleBySlugSchema, updateArticleSchema } from "schema/validator/article"
+import {
+  getArticleBySlugSchema,
+  updateArticleSchema,
+} from "schema/validator/article"
 
 export type ArticleAPI = typeof article
 
@@ -27,17 +36,16 @@ export const article = new Hono()
 
     return c.json(articles.value)
   })
-  .get("/:slug",
-    async (c) => {
-      const slug = c.req.param('slug')
-      const articleBySlug = await getArticleBySlug(slug)
+  .get("/:slug", async (c) => {
+    const slug = c.req.param("slug")
+    const articleBySlug = await getArticleBySlug(slug)
 
-      if (articleBySlug.error) return handleResultError(articleBySlug.error)
+    if (articleBySlug.error) return handleResultError(articleBySlug.error)
 
-      return c.json(articleBySlug.value)
-    })
+    return c.json(articleBySlug.value)
+  })
   .put("/:slug", zValidator("json", updateArticleSchema), async (c) => {
-    const { id } = c.req.valid('json')
+    const { id } = c.req.valid("json")
 
     const updated = await updateArticle(id, c.req.valid("json"))
 
@@ -45,14 +53,24 @@ export const article = new Hono()
 
     return c.json(updated.value)
   })
-  .get("/:id/versions",
-    async (c) => {
-      const id = c.req.param('id')
-      // const articleById = await getArticleById(Number(id))
+  .get("/:id/versions", async (c) => {
+    const id = c.req.param("id")
+    // const articleById = await getArticleById(Number(id))
 
-      const versions = await getArticleVersions(Number(id))
+    const versions = await getArticleVersions(Number(id))
 
-      if (versions.error) return handleResultError(versions.error)
+    if (versions.error) return handleResultError(versions.error)
 
-      return c.json(versions.value)
-    })
+    return c.json(versions.value)
+  })
+  .get("/:id/versions/:versionId", async (c) => {
+    const id = c.req.param("id")
+    const versionId = c.req.param("versionId")
+    // const articleById = await getArticleById(Number(id))
+
+    const versions = await getArticleVersionById(Number(id), Number(versionId))
+
+    if (versions.error) return handleResultError(versions.error)
+
+    return c.json(versions.value)
+  })

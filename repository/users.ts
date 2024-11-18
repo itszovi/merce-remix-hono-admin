@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm"
 import { users } from "config/tables"
 import { Err, Ok, Result } from "utils/result"
 import { DatabaseError, NotFoundError } from "utils/error"
-import bcrypt from 'bcryptjs'
+import bcrypt from "bcryptjs"
 
 /**
  * insert or update the users data
@@ -88,13 +88,16 @@ export const findUserById = async (
 }
 
 export async function verifyUserPassword(
-  username: User['user_name'],
-  password: Password['hash'],
+  username: User["user_name"],
+  password: Password["hash"]
 ) {
   const userWithPassword = await db.query.users.findFirst({
     where: eq(users.user_name, username),
     with: { password: true },
   })
+
+  console.log(username)
+  console.log(password)
 
   if (!userWithPassword || !userWithPassword.password) {
     return null

@@ -1,11 +1,11 @@
 import Mention from "@tiptap/extension-mention";
+import suggestion from "./suggestion";
 import { Color } from "@tiptap/extension-color";
 import ListItem from "@tiptap/extension-list-item";
 import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
 import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-// import { Icon } from "~/components/icon";
 import { cn } from "~/lib/classnames";
 import {
   FontBoldIcon,
@@ -14,9 +14,8 @@ import {
   StrikethroughIcon,
   ListBulletIcon,
 } from "@radix-ui/react-icons";
-
-import suggestion from "./suggestion";
-import React from "react";
+import { forwardRef, useRef } from "react";
+import { generateHTML } from "@tiptap/react";
 
 interface WysiwygEditorProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -105,8 +104,10 @@ const MenuBar = ({ editor }: { editor: Editor }) => {
   );
 };
 
-const WysiwygEditor = React.forwardRef<HTMLTextAreaElement, WysiwygEditorProps>(
+const WysiwygEditor = forwardRef<HTMLTextAreaElement, WysiwygEditorProps>(
   ({ className, ...props }, ref) => {
+    const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
     const editor = useEditor({
       immediatelyRender: false,
       extensions: [
@@ -138,6 +139,13 @@ const WysiwygEditor = React.forwardRef<HTMLTextAreaElement, WysiwygEditorProps>(
             "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl dark:text-white mx-auto focus:outline-none min-h-32 px-2 py-2",
         },
       },
+      onUpdate: ({ editor }) => {
+        if (textAreaRef?.current) {
+          console.log(editor.getHTML());
+          textAreaRef.current.value = editor.getHTML();
+          props.value = editor.getHTML();
+        }
+      },
     });
 
     if (!editor) {
@@ -160,13 +168,14 @@ const WysiwygEditor = React.forwardRef<HTMLTextAreaElement, WysiwygEditorProps>(
           </button> */}
         </div>
         <textarea
-          onChange={(e) => {
-            editor.commands.setContent(e.target.value);
-          }}
+          // onChange={(e) => {
+          //   editor.commands.setContent(e.target.value)
+          // }}
           {...props}
           id={props.id}
           name={props.name}
           className="hidden"
+          ref={textAreaRef}
         />
       </div>
     );

@@ -92,7 +92,9 @@ export const findAuthorById = async (
 /**
  * get authors
  */
-export const findAuthors = async (): Promise<Result<Author[], NotFoundError>> => {
+export const findAuthors = async (): Promise<
+  Result<Author[], NotFoundError>
+> => {
   const result = await db.query.authors.findMany({
     with: {
       contacts: true,
@@ -101,4 +103,3 @@ export const findAuthors = async (): Promise<Result<Author[], NotFoundError>> =>
 
   return result ? Ok(result as Author[]) : Err("NOT_FOUND")
 }
-

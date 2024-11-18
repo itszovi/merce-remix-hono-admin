@@ -15,7 +15,6 @@ export const getArticleBySlug = async (slug: string) => {
   console.log("slug:" + slug)
   const res = await client.api.articles[":slug"].$get({ param: { slug } })
 
-
   if (res.status === 500) return Err("SERVER_ERROR")
   return res.json()
 }
@@ -31,7 +30,16 @@ export const updateArticle = async (article: UpdateArticleSchema) => {
 }
 
 export const getArticleVersions = async (id: number) => {
-  const res = await client.api.articles[":id"].versions.$get({ param: { id: String(id) } })
+  const res = await client.api.articles[":id"].versions.$get({
+    param: { id: String(id) },
+  })
 
+  return res.json()
+}
+
+export const getArticleVersionById = async (id: number, versionId: number) => {
+  const res = await client.api.articles[":id"].versions[":versionId"].$get({
+    param: { id: String(id), versionId: String(versionId) },
+  })
   return res.json()
 }

@@ -27,10 +27,7 @@ export const createUrlRedirection = async (
   from: string,
   to: string
 ): Promise<Result<Redirection, NotFoundError>> => {
-  const result = await db
-    .insert(redirections)
-    .values({ from, to })
-    .returning()
+  const result = await db.insert(redirections).values({ from, to }).returning()
 
   return result ? Ok(result[0] as Redirection) : Err("NOT_FOUND")
 }
