@@ -272,3 +272,28 @@ export const authorsToArticleVersionsRelations = relations(
     }),
   })
 )
+
+export const tags = pgTable("tags", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  description: text("description"),
+  createdAt: timestamp({ withTimezone: true, mode: "string" }),
+  updatedAt: timestamp({ withTimezone: true, mode: "string" }).defaultNow(),
+})
+
+export const media = pgTable("media", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  description: text("description"),
+  caption: text("caption"),
+  credit: text("credit"),
+  width: integer("width"),
+  height: integer("height"),
+  contentUrl: text("content_url").notNull(),
+  contentSize: integer("content_size"),
+  encodingFormat: text("encoding_format"),
+  createdAt: timestamp({ withTimezone: true, mode: "string" }),
+  updatedAt: timestamp({ withTimezone: true, mode: "string" }).defaultNow(),
+})

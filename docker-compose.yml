@@ -20,8 +20,6 @@ services:
       - PORT=3000
       - HOST=0.0.0.0
       - SECRET=${SECRET:-secret}
-      - GITHUB_CLIENT_ID=""
-      - GITHUB_CLIENT_SECRET=""
       - DATABASE_URL=postgres://${DB_USERNAME:-postgres}:${DB_PASSWORD:-postgres}@${APP_NAME:-app}-postgres:5432/${DB_NAME:-postgres}?sslmode=disable
 
   postgres:

@@ -29,9 +29,14 @@ const EnvSchema = z.object({
 
   SESSION_SECRET: z.string(),
 
-  GITHUB_CLIENT_ID: z.string(),
 
-  GITHUB_CLIENT_SECRET: z.string(),
+  STORAGE_BUCKET: z.string(),
+
+  STORAGE_REGION: z.string(),
+
+  STORAGE_ACCESS_KEY: z.string(),
+  
+  STORAGE_SECRET: z.string(),
 })
 
 export type env = z.infer<typeof EnvSchema>

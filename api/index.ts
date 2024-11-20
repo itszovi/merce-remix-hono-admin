@@ -5,6 +5,7 @@ import { user } from "./routes/user"
 import { author } from "./routes/author"
 import { article } from "./routes/articles"
 import { logger } from "hono/logger"
+import { cors } from "hono/cors"
 import { serve } from "@hono/node-server"
 import { HTTPException } from "hono/http-exception"
 import { remixMiddleware } from "./middleware/remix"
@@ -14,6 +15,7 @@ import { checkAuth, isAuthenticated } from "./middleware/auth"
 const app = new Hono()
 
 app.use(logger())
+
 
 app.use("/assets/*", serveStatic({ root: "./build/client" }))
 

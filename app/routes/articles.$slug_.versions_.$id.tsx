@@ -14,6 +14,7 @@ import { Article as OriginalArticle } from "schema";
 import { Button } from "~/components/ui/button";
 import { GeneralErrorBoundary } from "~/components/error-boundary";
 import { articles } from "config/tables";
+import { PureComponent } from 'react';
 import ReactDiffViewer from "react-diff-viewer-continued";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
