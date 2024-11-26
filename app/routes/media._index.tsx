@@ -24,7 +24,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { Article } from "schema";
 import DOMPurify from "isomorphic-dompurify";
-import { formatImage } from "utils/image.server";
+import { formatImages } from "utils/image.server";
 import { s3UploadHandler } from "utils/s3.server";
 import { GeneralErrorBoundary } from "~/components/error-boundary";
 
@@ -35,23 +35,25 @@ import { GeneralErrorBoundary } from "~/components/error-boundary";
 // };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  // const formData = await request.formData();
-  // const file = formData.get("file") as File;
-
-  // console.log(file);
-
-  // const processedImageBuffer = await formatImage(await file.arrayBuffer(), 200);
-
-  // console.log("result: " + processedImageBuffer);
-
-  // // return redirect("/media");
-  // return processedImageBuffer
   const uploadHandler: UploadHandler = composeUploadHandlers(
     s3UploadHandler,
     createMemoryUploadHandler()
   );
   const formData = await parseMultipartFormData(request, uploadHandler);
-  const imgSrc = formData.get("img");
+  const img = formData.get("img") as File;
+
+  if (!img) {
+    return { errorMsg: "No image selected" };
+  }
+
+  const imageData = await img.arrayBuffer();
+  const formattedImages = await formatImages(Buffer.from(imageData));
+
+  const uploadPromises = formattedImages.map(async ({ size, buffer }) => {
+    const filename = `${img.name.split('.')[0]}_${size}.${img.name.split('.').pop()}`;
+    return uploadStreamToS3(buffer, filename);
+  });
+
 
   console.log(imgSrc);
   // const imgDesc = formData.get("desc");
@@ -85,7 +87,7 @@ export default function Articles() {
           <img src={result.imgSrc} alt="test" className="w-full h-full" />
         )}
       </div>
-      <img src="https://mercetest2.s3.eu-central-1.amazonaws.com/images/1732064963256-434949418_17855489556153018_8081878331095636860_n.jpg" alt="" />
+      <img src="https://mercetest2.s3.eu-central-1.amazonaws.com/images/1732141120475-kresz.jpg" alt="" />
     </div>
   );
 }
